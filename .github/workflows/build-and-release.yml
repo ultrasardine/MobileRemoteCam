@@ -98,9 +98,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
-          cache: true
+        cache: true
           
       - name: Get dependencies
         run: flutter pub get
@@ -140,9 +139,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
-          cache: true
+        cache: true
           
       - name: Get dependencies
         run: flutter pub get
