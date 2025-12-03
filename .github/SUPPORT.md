@@ -79,9 +79,9 @@ For bug reports and feature requests:
 
 ### Development
 
-**Q: Build fails with Gradle errors**
+**Q: Build fails with Android errors**
 - Ensure you have JDK 17 installed
-- Run `./gradlew clean build`
+- Run `flutter clean` then `flutter build apk`
 - Check that Android SDK is properly configured
 - Review [CONTRIBUTING.md](../CONTRIBUTING.md) for setup instructions
 

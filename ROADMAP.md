@@ -8,7 +8,7 @@ This roadmap outlines the transformation of RemoteCam from an Android-only MJPEG
 
 ### Goals
 - Establish cross-platform architecture
-- Migrate from Gradle to Gulp/Makefile build system
+- Use Flutter's standard build system
 - Implement basic Flutter UI framework
 
 ### Deliverables

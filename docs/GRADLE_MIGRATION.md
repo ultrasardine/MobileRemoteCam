@@ -236,8 +236,7 @@ To:
 ```bash
 # Clean everything
 flutter clean
-cd android && ./gradlew clean
-cd ../..
+rm -rf build android/app/build
 
 # Reinstall dependencies
 flutter pub get

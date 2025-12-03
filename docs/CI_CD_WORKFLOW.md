@@ -27,9 +27,9 @@ This project uses GitHub Actions for continuous integration and continuous deplo
 
 #### Android Tests
 - Runs on Ubuntu
-- Executes Android lint checks
-- Runs Android-specific unit tests
-- Uploads test results as artifacts
+- Runs `flutter analyze` for code analysis
+- Builds Android APK with `flutter build apk --debug`
+- Uploads build artifacts
 
 #### iOS Tests
 - Runs on macOS
@@ -37,7 +37,39 @@ This project uses GitHub Actions for continuous integration and continuous deplo
 - Runs iOS unit tests via Xcode
 - Uploads test results as artifacts
 
-### 2. Build and Release Workflow (`build-and-release.yml`)
+### 2. Android CI Workflow (`android-ci.yml`)
+
+**Trigger:** Pushes and PRs to `main` and `develop` branches
+
+**Purpose:** Validate Android-specific builds using Flutter
+
+**Jobs:**
+
+#### Build
+- Runs on Ubuntu
+- Sets up JDK 17 and Flutter
+- Runs `flutter analyze` for code analysis
+- Runs `flutter test` for unit tests
+- Builds Android APK with `flutter build apk --debug`
+- Uploads build artifacts and test results
+
+### 3. CodeQL Workflow (`codeql.yml`)
+
+**Trigger:** Pushes to `main`, PRs to `main`, and weekly schedule
+
+**Purpose:** Security and code quality analysis
+
+**Jobs:**
+
+#### Analyze (Java/Kotlin)
+- Runs on Ubuntu
+- Initializes CodeQL for Java/Kotlin analysis
+- Sets up JDK 17 and Flutter
+- Builds Android code with `flutter build apk --debug`
+- Performs CodeQL security analysis
+- Uses CodeQL Action v4
+
+### 4. Build and Release Workflow (`build-and-release.yml`)
 
 **Trigger:** When a PR is merged to `main`
 
@@ -228,6 +260,16 @@ If you need to create a release manually:
   flutter build ios --release --no-codesign
   ```
 
+### Flutter Build Issues
+
+**Problem:** Android build fails
+
+**Solution:**
+- Ensure JDK 17 is installed
+- Run `flutter pub get` to get dependencies
+- Run `flutter build apk --debug` to test locally
+- Check `flutter doctor` for environment issues
+
 ### Version Not Bumping
 
 **Problem:** Release created with wrong version
@@ -247,6 +289,42 @@ If you need to create a release manually:
 - Ensure workflow file is on main branch
 - Check if PR was actually merged vs closed
 
+## Testing Workflows Locally
+
+You can test GitHub Actions workflows locally using [act](https://github.com/nektos/act):
+
+### Installation
+
+```bash
+# macOS
+brew install act
+
+# Other platforms - see https://github.com/nektos/act#installation
+```
+
+### Usage
+
+```bash
+# List all workflows
+act --list
+
+# Test a specific workflow (dry run)
+act pull_request -W .github/workflows/android-ci.yml --dryrun
+
+# Run a specific job
+act pull_request -W .github/workflows/android-ci.yml -j build
+
+# For Apple M-series chips, specify architecture
+act pull_request -W .github/workflows/android-ci.yml --container-architecture linux/amd64
+```
+
+### Common Issues
+
+- **Docker required:** `act` runs workflows in Docker containers
+- **Large images:** First run downloads container images (~GB)
+- **Secrets:** Use `-s GITHUB_TOKEN=...` to provide secrets
+- **Platform differences:** Some actions may behave differently locally
+
 ## Best Practices
 
 1. **Always add labels to PRs** - This ensures correct version bumping
@@ -255,6 +333,7 @@ If you need to create a release manually:
 4. **Test locally before pushing** - Run `flutter test` and `flutter analyze`
 5. **Use conventional commits** - Helps with changelog generation
 6. **Review build artifacts** - Download and test APK/IPA before announcing releases
+7. **Test workflows with act** - Validate wo
 
 ## Workflow Permissions
 

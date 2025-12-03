@@ -23,11 +23,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version bump script for local development
 - Comprehensive CI/CD documentation (docs/CI_CD_WORKFLOW.md)
 - GitHub Actions badges in README.md
+- Local workflow testing documentation using `act`
+- Comprehensive Makefile with industry-standard targets:
+  - Testing: `test`, `test-unit`, `test-integration`, `test-coverage`, `test-watch`
+  - Code quality: `lint`, `format`, `analyze`, `check`, `ci`, `fix`
+  - CI/CD testing: `act-list`, `act-test`, `act-android`, `act-codeql`
+  - Versioning: `version-patch`, `version-minor`, `version-major`
+  - Utilities: `doctor`, `setup`, `help`
 
 ### Changed
 - **BREAKING**: Migrated from standalone Gradle build to Flutter plugin architecture
 - Updated README.md with comprehensive project information
 - Clarified MIT License in documentation
+
+### Fixed
+- GitHub Actions workflows updated to use Flutter commands instead of direct Gradle calls
+- Android CI workflow now uses `flutter build apk` and `flutter test`
+- CodeQL workflow updated to use Flutter build and v4 action (from deprecated v3)
+- Test workflow Android job simplified to use Flutter commands
+- Removed all `./gradlew` command references from documentation and Makefile
+- Updated dependabot.yml to use `pub` ecosystem instead of `gradle`
+- Updated SUPPORT.md, BUILD_SYSTEM.md, GRADLE_MIGRATION.md with Flutter commands
 - Updated CONTRIBUTING.md with Flutter development guidelines
 - Migrated Android native code to Flutter plugin structure (package: com.ipcamera.ip_camera_streaming)
 - Updated Makefile to use Flutter build system instead of Gulp

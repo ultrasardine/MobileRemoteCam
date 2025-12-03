@@ -82,7 +82,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
         
     - name: Set up Flutter
       if: steps.check_flutter.outputs.exists == 'true'
@@ -95,26 +94,21 @@ jobs:
       if: steps.check_flutter.outputs.exists == 'true'
       continue-on-error: true
       run: flutter pub get
-        
-    - name: Grant execute permission for gradlew
-      if: steps.check_flutter.outputs.exists == 'true'
-      run: chmod +x android/gradlew
-      working-directory: ./
       
-    - name: Run Android lint
+    - name: Analyze code
       if: steps.check_flutter.outputs.exists == 'true'
-      run: cd android && ./gradlew lint
+      run: flutter analyze
       
-    - name: Run Android unit tests
+    - name: Build Android APK
       if: steps.check_flutter.outputs.exists == 'true'
-      run: cd android && ./gradlew test
+      run: flutter build apk --debug
       
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: steps.check_flutter.outputs.exists == 'true' && always()
       with:
         name: android-test-results
-        path: android/app/build/test-results/
+        path: build/app/outputs/
         
   ios-test:
     name: iOS Tests

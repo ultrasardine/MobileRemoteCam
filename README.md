@@ -80,14 +80,11 @@ Transform your iOS or Android device into a professional IP camera with support 
 git clone https://github.com/yourusername/ip-camera-streaming.git
 cd ip-camera-streaming
 
-# Install dependencies
-make install-deps
+# View all available commands
+make help
 
-# Build for iOS
-make build-ios
-
-# Build for Android
-make build-android
+# Initial setup (doctor + deps)
+make setup
 
 # Run in development mode
 make dev-ios    # or make dev-android
@@ -238,19 +235,27 @@ The project uses Flutter's standard build system with native plugins:
 **Common Commands:**
 
 ```bash
+# View all commands
+make help
+
 # Install all dependencies
 make install-deps
 
 # Build for production
-make build-ios
-make build-android
+make build          # Both platforms
+make build-ios      # iOS only
+make build-android  # Android APK
+make build-aab      # Android App Bundle
 
 # Development builds
-make dev-ios
-make dev-android
+make dev            # Connected device
+make dev-ios        # iOS
+make dev-android    # Android
 
-# Run tests
-make test
+# Code quality
+make check          # Format + analyze + test
+make ci             # Full CI pipeline
+make fix            # Auto-fix issues
 
 # Clean build artifacts
 make clean
@@ -275,13 +280,14 @@ The project uses a comprehensive testing strategy:
 
 ```bash
 # Run all tests
-flutter test
-
-# Run iOS native tests
-cd ios && xcodebuild test -workspace Runner.xcworkspace -scheme Runner
-
-# Run tests via Makefile
 make test
+
+# Run with coverage
+make test-coverage
+
+# Run specific test types
+make test-unit
+make test-integration
 ```
 
 ### CI/CD Pipeline
@@ -300,6 +306,17 @@ The project uses GitHub Actions for automated testing and releases:
 - Creates GitHub releases with semantic versioning
 - Attaches APK, AAB, and IPA files
 
+**Test Workflows Locally with act:**
+```bash
+# List available workflows
+make act-list
+
+# Test workflows (dryrun)
+make act-test       # test.yml
+make act-android    # android-ci.yml
+make act-codeql     # codeql.yml
+```
+
 **Semantic Versioning:**
 - Version format: `MAJOR.MINOR.PATCH+BUILD`
 - Automatic version bumping based on PR labels:
@@ -308,10 +325,12 @@ The project uses GitHub Actions for automated testing and releases:
   - `patch` or no label → Patch version bump
 
 ```bash
-# Bump version locally
-./scripts/bump_version.sh [major|minor|patch]
+# Bump version via Makefile
+make version-patch  # 0.0.X
+make version-minor  # 0.X.0
+make version-major  # X.0.0
 
-# Example: bump minor version
+# Or use script directly
 ./scripts/bump_version.sh minor
 ```
 

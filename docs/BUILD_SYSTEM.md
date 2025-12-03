@@ -10,6 +10,17 @@ The IP Camera Streaming Platform uses Flutter's standard build system with nativ
 
 ## Quick Start
 
+```bash
+# View all available commands
+make help
+
+# Initial setup
+make setup
+
+# Run development build
+make dev
+```
+
 ### Install Dependencies
 
 ```bash
@@ -22,55 +33,60 @@ This will install:
 
 ### Build Commands
 
-#### iOS
-```bash
-# Development build
-make dev-ios
+| Command | Description |
+|---------|-------------|
+| `make build` | Build both iOS and Android release |
+| `make build-ios` | Build iOS release |
+| `make build-android` | Build Android APK release |
+| `make build-aab` | Build Android App Bundle |
+| `make dev` | Run on connected device |
+| `make dev-ios` | Run on iOS simulator/device |
+| `make dev-android` | Run on Android emulator/device |
 
-# Production build
-make build-ios
-```
+### Testing Commands
 
-#### Android
-```bash
-# Development build
-make dev-android
+| Command | Description |
+|---------|-------------|
+| `make test` | Run all tests |
+| `make test-unit` | Run unit tests only |
+| `make test-integration` | Run integration tests |
+| `make test-coverage` | Run tests with coverage report |
+| `make test-watch` | Run tests in watch mode |
 
-# Production build (using Flutter)
-make build-android
-```
+### Code Quality Commands
 
-#### Both Platforms
-```bash
-# Build everything
-make all
-```
+| Command | Description |
+|---------|-------------|
+| `make lint` | Run linter |
+| `make format` | Format code |
+| `make analyze` | Analyze code for issues |
+| `make check` | Run format check + analyze + test |
+| `make ci` | Full CI pipeline (clean, deps, check) |
+| `make fix` | Apply automatic fixes |
+
+### CI/CD Testing with act
+
+Test GitHub Actions workflows locally before pushing:
+
+| Command | Description |
+|---------|-------------|
+| `make act-list` | List available workflows |
+| `make act-test` | Test test.yml workflow (dryrun) |
+| `make act-android` | Test android-ci.yml workflow (dryrun) |
+| `make act-codeql` | Test codeql.yml workflow (dryrun) |
+| `make act-test-run` | Actually run test.yml workflow |
 
 ### Clean Build Artifacts
 
 ```bash
-# Clean all platforms
 make clean
-
-# Clean Android only
-cd android && ./gradlew clean
-
-# Clean iOS only
-cd ios && rm -rf Pods build
 ```
 
-### Run Tests
-
-```bash
-# Run all tests
-make test
-
-# Run Flutter tests only
-flutter test
-
-# Run iOS native tests
-cd ios && xcodebuild test -workspace Runner.xcworkspace -scheme Runner
-```
+This removes:
+- Flutter build artifacts
+- iOS Pods and build directories
+- Android build directories
+- Coverage reports
 
 ## Android Build System (Flutter + Gradle)
 
@@ -226,8 +242,8 @@ flutter clean
 flutter pub get
 flutter build apk
 
-# Or manually clean Gradle
-cd android && ./gradlew clean
+# Or manually clean Android build
+rm -rf build android/app/build
 ```
 
 ### NDK Build Failed (Future)
