@@ -1,7 +1,9 @@
+@Tags(['device-required'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ip_camera_streaming/controllers/streaming_controller.dart';
 import 'package:ip_camera_streaming/models/camera_info.dart';
-import 'package:ip_camera_streaming/models/resolution.dart';
 import 'package:ip_camera_streaming/models/stream_config.dart';
 import 'package:ip_camera_streaming/models/rtmp_target.dart';
 
@@ -12,7 +14,6 @@ import 'package:ip_camera_streaming/models/rtmp_target.dart';
 /// devices to verify platform-specific implementations.
 ///
 /// Requirements: 1.1, 1.2, 5.2
-@Tags(['device-required'])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
