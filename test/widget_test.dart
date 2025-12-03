@@ -1,4 +1,7 @@
 // Basic Flutter widget test for IP Camera Streaming app
+// Requires device with platform channels - skip in CI
+@Tags(['device-required'])
+library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
