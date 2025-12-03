@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced .gitignore for cross-platform development
 - Flutter Android plugin structure with method channels
 - NetworkMonitor service for Android platform
-- CI/CD workflow for automated testing on all branches
+- Simplified CI/CD workflows:
+  - `test.yml` - runs on all pushes/PRs (analyze + test)
+  - `build.yml` - runs on main (builds Android APK/AAB and iOS IPA)
 - Build and release workflow for automatic binary generation
 - Semantic versioning automation based on PR labels
 - Version bump script for local development

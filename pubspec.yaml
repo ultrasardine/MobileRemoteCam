@@ -16,9 +16,8 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   
   # Network and connectivity
-  # TODO: Re-enable once embedding detection issue is resolved
-  # connectivity_plus: ^6.0.0
-  # network_info_plus: ^6.0.0
+  connectivity_plus: ^6.0.0
+  network_info_plus: ^6.0.0
   
   # UI components
   cupertino_icons: ^1.0.6
