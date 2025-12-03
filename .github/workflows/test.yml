@@ -28,4 +28,4 @@ jobs:
       run: flutter analyze --no-fatal-infos --no-fatal-warnings
       
     - name: Run tests
-      run: flutter test --exclude-tags=device-required
+      run: flutter test
