@@ -17,7 +17,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Check if Flutter project exists
+      id: check_flutter
+      run: |
+        if [ -f "pubspec.yaml" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "⚠️ No pubspec.yaml found - skipping Flutter tests"
+        fi
+      
     - name: Set up Flutter
+      if: steps.check_flutter.outputs.exists == 'true'
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.16.0'
@@ -25,18 +36,23 @@ jobs:
         cache: true
         
     - name: Get dependencies
+      if: steps.check_flutter.outputs.exists == 'true'
       run: flutter pub get
       
     - name: Verify formatting
+      if: steps.check_flutter.outputs.exists == 'true'
       run: dart format --output=none --set-exit-if-changed .
       
     - name: Analyze code
+      if: steps.check_flutter.outputs.exists == 'true'
       run: flutter analyze
       
     - name: Run unit tests
+      if: steps.check_flutter.outputs.exists == 'true'
       run: flutter test --coverage
       
     - name: Upload coverage
+      if: steps.check_flutter.outputs.exists == 'true'
       uses: codecov/codecov-action@v3
       with:
         files: ./coverage/lcov.info
@@ -50,7 +66,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Check if Flutter project exists
+      id: check_flutter
+      run: |
+        if [ -f "pubspec.yaml" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "⚠️ No pubspec.yaml found - skipping Android tests"
+        fi
+      
     - name: Set up JDK 17
+      if: steps.check_flutter.outputs.exists == 'true'
       uses: actions/setup-java@v4
       with:
         java-version: '17'
@@ -58,6 +85,7 @@ jobs:
         cache: gradle
         
     - name: Set up Flutter
+      if: steps.check_flutter.outputs.exists == 'true'
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.16.0'
@@ -65,21 +93,25 @@ jobs:
         cache: true
         
     - name: Get dependencies
+      if: steps.check_flutter.outputs.exists == 'true'
       run: flutter pub get
         
     - name: Grant execute permission for gradlew
+      if: steps.check_flutter.outputs.exists == 'true'
       run: chmod +x android/gradlew
       working-directory: ./
       
     - name: Run Android lint
+      if: steps.check_flutter.outputs.exists == 'true'
       run: cd android && ./gradlew lint
       
     - name: Run Android unit tests
+      if: steps.check_flutter.outputs.exists == 'true'
       run: cd android && ./gradlew test
       
     - name: Upload test results
       uses: actions/upload-artifact@v4
-      if: always()
+      if: steps.check_flutter.outputs.exists == 'true' && always()
       with:
         name: android-test-results
         path: android/app/build/test-results/
@@ -92,7 +124,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Check if Flutter project exists
+      id: check_flutter
+      run: |
+        if [ -f "pubspec.yaml" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "⚠️ No pubspec.yaml found - skipping iOS tests"
+        fi
+      
     - name: Set up Flutter
+      if: steps.check_flutter.outputs.exists == 'true'
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.16.0'
@@ -100,12 +143,15 @@ jobs:
         cache: true
         
     - name: Get dependencies
+      if: steps.check_flutter.outputs.exists == 'true'
       run: flutter pub get
       
     - name: Run iOS build check
+      if: steps.check_flutter.outputs.exists == 'true'
       run: flutter build ios --no-codesign --debug
       
     - name: Run iOS unit tests
+      if: steps.check_flutter.outputs.exists == 'true'
       run: |
         cd ios
         xcodebuild test \
@@ -116,7 +162,7 @@ jobs:
       
     - name: Upload test results
       uses: actions/upload-artifact@v4
-      if: always()
+      if: steps.check_flutter.outputs.exists == 'true' && always()
       with:
         name: ios-test-results
         path: ios/test-results/

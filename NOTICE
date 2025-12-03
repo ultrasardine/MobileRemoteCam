@@ -1,0 +1,61 @@
+IP Camera Streaming Platform
+Copyright (c) 2023 Thomas SIMON
+
+This product includes software developed by third parties:
+
+================================================================================
+
+Live555 Streaming Media
+Copyright (c) 1996-2023, Live Networks, Inc.
+Licensed under the GNU Lesser General Public License v2.1
+http://www.live555.com/
+
+================================================================================
+
+librtmp (RTMPDump)
+Copyright (c) 2009 Andrej Stepanchuk
+Copyright (c) 2009-2010 Howard Chu
+Copyright (c) 2010 2a665470ced7adb7156fcef47f8199a6371c117b8a79e399a2771e0b36384090
+Licensed under the GNU Lesser General Public License v2.1
+https://rtmpdump.mplayerhq.hu/
+
+================================================================================
+
+libjpeg-turbo
+Copyright (C) 2009-2023, D. R. Commander.
+Copyright (C) 2015, Viktor Szathmáry.
+Licensed under the BSD 3-Clause License
+https://libjpeg-turbo.org/
+
+================================================================================
+
+Kotlin Standard Library
+Copyright 2010-2023 JetBrains s.r.o. and Kotlin Programming Language contributors
+Licensed under the Apache License 2.0
+https://kotlinlang.org/
+
+================================================================================
+
+AndroidX Libraries
+Copyright (C) 2018 The Android Open Source Project
+Licensed under the Apache License 2.0
+https://developer.android.com/jetpack/androidx
+
+================================================================================
+
+Ktor
+Copyright 2014-2023 JetBrains s.r.o. and contributors
+Licensed under the Apache License 2.0
+https://ktor.io/
+
+================================================================================
+
+Glide
+Copyright 2014 Google, Inc.
+Licensed under the BSD, part MIT and Apache 2.0 licenses
+https://github.com/bumptech/glide
+
+================================================================================
+
+This software may include other open source components. Please refer to the
+individual component licenses for complete license information.

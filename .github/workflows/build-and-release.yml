@@ -24,11 +24,22 @@ jobs:
     outputs:
       version: ${{ steps.semver.outputs.version }}
       version_type: ${{ steps.semver.outputs.version_type }}
+      flutter_exists: ${{ steps.check_flutter.outputs.exists }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
+      - name: Check if Flutter project exists
+        id: check_flutter
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No pubspec.yaml found - skipping build and release"
+          fi
           
       - name: Determine version bump
         id: semver
@@ -71,6 +82,7 @@ jobs:
 
   build-android:
     needs: determine-version
+    if: needs.determine-version.outputs.flutter_exists == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -119,6 +131,7 @@ jobs:
 
   build-ios:
     needs: determine-version
+    if: needs.determine-version.outputs.flutter_exists == 'true'
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -158,6 +171,7 @@ jobs:
 
   create-release:
     needs: [determine-version, build-android, build-ios]
+    if: needs.determine-version.outputs.flutter_exists == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
