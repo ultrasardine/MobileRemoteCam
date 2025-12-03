@@ -1,0 +1,35 @@
+name: ip_camera_streaming
+description: Transform your iOS or Android device into a professional IP camera with RTSP and RTMP streaming support.
+publish_to: 'none'
+version: 0.0.4+4
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State management and utilities
+  provider: ^6.0.5
+  shared_preferences: ^2.2.0
+  flutter_secure_storage: ^9.0.0
+  
+  # Network and connectivity
+  connectivity_plus: ^6.0.0
+  network_info_plus: ^6.0.0
+  
+  # UI components
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  
+  # Property-based testing
+  test: ^1.24.0
+  mockito: ^5.4.0
+
+flutter:
+  uses-material-design: true

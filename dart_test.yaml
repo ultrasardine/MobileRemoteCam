@@ -1,0 +1,3 @@
+tags:
+  device-required:
+    skip: "Requires physical device with camera"
