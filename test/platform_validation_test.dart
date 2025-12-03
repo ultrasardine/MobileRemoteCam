@@ -12,6 +12,7 @@ import 'package:ip_camera_streaming/models/rtmp_target.dart';
 /// devices to verify platform-specific implementations.
 ///
 /// Requirements: 1.1, 1.2, 5.2
+@Tags(['device-required'])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
