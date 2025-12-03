@@ -1,0 +1,267 @@
+name: Build and Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  # Only run if PR was merged
+  check-merge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+    steps:
+      - name: Check if release needed
+        id: check
+        run: echo "should_release=true" >> $GITHUB_OUTPUT
+
+  determine-version:
+    needs: check-merge
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+      version_type: ${{ steps.semver.outputs.version_type }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Determine version bump
+        id: semver
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          
+          # Remove 'v' prefix if present
+          LATEST_VERSION=${LATEST_TAG#v}
+          
+          # Split version into components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+          
+          # Get PR labels and title
+          PR_LABELS="${{ join(github.event.pull_request.labels.*.name, ',') }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Determine version bump type based on labels or commit messages
+          if echo "$PR_LABELS" | grep -qi "breaking\|major"; then
+            VERSION_TYPE="major"
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif echo "$PR_LABELS" | grep -qi "feature\|minor\|enhancement"; then
+            VERSION_TYPE="minor"
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            VERSION_TYPE="patch"
+            PATCH=$((PATCH + 1))
+          fi
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION (type: $VERSION_TYPE)"
+          
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+
+  build-android:
+    needs: determine-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+          
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Update version in pubspec.yaml
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          BUILD_NUMBER=${{ github.run_number }}
+          sed -i "s/^version: .*/version: ${VERSION}+${BUILD_NUMBER}/" pubspec.yaml
+          
+      - name: Build Android APK
+        run: flutter build apk --release
+        
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          
+      - name: Upload App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
+
+  build-ios:
+    needs: determine-version
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Update version in pubspec.yaml
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          BUILD_NUMBER=${{ github.run_number }}
+          sed -i '' "s/^version: .*/version: ${VERSION}+${BUILD_NUMBER}/" pubspec.yaml
+          
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+        
+      - name: Create iOS archive
+        run: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r IPCameraStreaming.ipa Payload
+          
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: build/ios/iphoneos/IPCameraStreaming.ipa
+
+  create-release:
+    needs: [determine-version, build-android, build-ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: ./artifacts/
+          
+      - name: Download Android Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: android-bundle
+          path: ./artifacts/
+          
+      - name: Download iOS IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: ./artifacts/
+          
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          VERSION_TYPE="${{ needs.determine-version.outputs.version_type }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          
+          cat > release_notes.md << EOF
+          ## Release v${VERSION}
+          
+          **Type:** ${VERSION_TYPE} release
+          **PR:** #${PR_NUMBER} - ${PR_TITLE}
+          **Author:** @${PR_AUTHOR}
+          
+          ### Changes
+          
+          ${{ github.event.pull_request.body }}
+          
+          ### Downloads
+          
+          - **Android APK:** app-release.apk
+          - **Android Bundle:** app-release.aab (for Google Play)
+          - **iOS IPA:** IPCameraStreaming.ipa (unsigned)
+          
+          ### Installation
+          
+          #### Android
+          1. Download the APK file
+          2. Enable "Install from Unknown Sources" in your device settings
+          3. Install the APK
+          
+          #### iOS
+          1. Download the IPA file
+          2. Sign with your own certificate or use a signing service
+          3. Install via Xcode or third-party tools
+          
+          ---
+          
+          Built from commit: ${{ github.sha }}
+          EOF
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.determine-version.outputs.version }}
+          name: Release v${{ needs.determine-version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            ./artifacts/app-release.apk
+            ./artifacts/app-release.aab
+            ./artifacts/IPCameraStreaming.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Update CHANGELOG
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          DATE=$(date +%Y-%m-%d)
+          
+          # Create new changelog entry
+          cat > new_entry.md << EOF
+          ## [${VERSION}] - ${DATE}
+          
+          ### Changed
+          - ${{ github.event.pull_request.title }}
+          
+          EOF
+          
+          # Insert after "## [Unreleased]" line
+          sed -i "/## \[Unreleased\]/r new_entry.md" CHANGELOG.md
+          
+      - name: Commit CHANGELOG
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG for v${{ needs.determine-version.outputs.version }}"
+          git push
